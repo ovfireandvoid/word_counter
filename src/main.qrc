@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file>imports/ChartView.qml</file>
+        <file>imports/MainWindow.qml</file>
+        <file>imports/MainWindowFooter.qml</file>
+        <file>imports/MainWindowHeader.qml</file>
+        <file>imports/Placeholder.qml</file>
+        <file>imports/qmldir</file>
+        <file>main.qml</file>
+    </qresource>
+</RCC>

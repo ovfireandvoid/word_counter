@@ -1,0 +1,6 @@
+MainWindow MainWindow.qml
+
+internal ChartView ChartView.qml
+internal MainWindowFooter MainWindowFooter.qml
+internal MainWindowHeader MainWindowHeader.qml
+internal Placeholder Placeholder.qml
