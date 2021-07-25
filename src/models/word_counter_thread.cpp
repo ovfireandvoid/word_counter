@@ -6,11 +6,9 @@
 #include <QByteArray>
 #include <QFile>
 #include <QMutexLocker>
-#include <QStringRef>
 #include <QTextBoundaryFinder>
 #include <QTextCodec>
 #include <QTextDecoder>
-#include <QVector>
 
 WordCounterThread::WordCounterThread(QString file_name, QObject *parent) :
     QThread(parent),
@@ -88,31 +86,7 @@ void WordCounterThread::run() {
             }
         }
 
-        QVector<QStringRef> words;
-        QTextBoundaryFinder words_finder{QTextBoundaryFinder::Word,
-                                         input_line.unicode(),
-                                         input_line.size()};
-
-        int word_pos = -1;
-        int word_end = -1;
-
-        while (words_finder.isAtBoundary()) {
-            if (words_finder.boundaryReasons().testFlag(QTextBoundaryFinder::StartOfItem)) {
-                word_pos = words_finder.position();
-            }
-            if (words_finder.boundaryReasons().testFlag(QTextBoundaryFinder::EndOfItem)) {
-                word_end = words_finder.position();
-            }
-
-            if ((word_pos != -1) && (word_end != -1)) {
-                words.append(input_line.midRef(word_pos, word_end - word_pos));
-
-                word_pos = -1;
-                word_end = -1;
-            }
-
-            words_finder.toNextBoundary();
-        }
+        const auto words = wordsFrom(input_line);
 
         {
             const QMutexLocker lock{&m_histogram_mutex};
@@ -133,4 +107,32 @@ void WordCounterThread::run() {
     if (!isInterruptionRequested()) {
         emit resultReady();
     }
+}
+
+auto WordCounterThread::wordsFrom(const QString &str) -> QVector<QStringRef> {
+    QVector<QStringRef> words;
+    QTextBoundaryFinder words_finder{QTextBoundaryFinder::Word, str.unicode(), str.size()};
+
+    int word_pos = -1;
+    int word_end = -1;
+
+    while (words_finder.isAtBoundary()) {
+        if (words_finder.boundaryReasons().testFlag(QTextBoundaryFinder::StartOfItem)) {
+            word_pos = words_finder.position();
+        }
+        if (words_finder.boundaryReasons().testFlag(QTextBoundaryFinder::EndOfItem)) {
+            word_end = words_finder.position();
+        }
+
+        if ((word_pos != -1) && (word_end != -1)) {
+            words.append(str.midRef(word_pos, word_end - word_pos));
+
+            word_pos = -1;
+            word_end = -1;
+        }
+
+        words_finder.toNextBoundary();
+    }
+
+    return words;
 }

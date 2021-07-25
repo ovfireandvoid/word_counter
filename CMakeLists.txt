@@ -4,7 +4,7 @@ cmake_policy(SET CMP0092 NEW) # no default MSVC warning flags in CMAKE_<LANG>_FL
 
 project(WordCounter LANGUAGES CXX)
 
-set(BUILD_TESTS OFF CACHE BOOL "Build tests")
+set(ENABLE_TESTING OFF CACHE BOOL "Enable test targets")
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -25,10 +25,7 @@ include(cmake/CompilerWarnings)
 set_project_warnings(${PROJECT_NAME})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-
-
     OUTPUT_NAME "Word Counter"
-
     WIN32_EXECUTABLE ON
 )
 
@@ -81,7 +78,7 @@ source_group(src REGULAR_EXPRESSION "^.*\.(cpp|h|qrc)$")
 
 # Tests
 
-if(BUILD_TESTS)
+if(ENABLE_TESTING)
     enable_testing()
 
     add_subdirectory(tests)

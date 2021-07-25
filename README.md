@@ -22,6 +22,6 @@ git clone https://github.com/ovfireandvoid/word_counter.git
 cd word_counter
 mkdir build
 cd build
-cmake .. -DBUILD_TESTS=ON
+cmake .. -DENABLE_TESTING=ON
 ctest .
 ```

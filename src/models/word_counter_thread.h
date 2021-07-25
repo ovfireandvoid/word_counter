@@ -3,7 +3,9 @@
 #include <QHash>
 #include <QMutex>
 #include <QString>
+#include <QStringRef>
 #include <QThread>
+#include <QVector>
 
 #include "word_counter_error.h"
 #include "word_counter_result.h"
@@ -18,6 +20,8 @@ public:
 
 private:
     void run() override;
+
+    static auto wordsFrom(const QString &str) -> QVector<QStringRef>;
 
 signals:
     void progressRangeChanged(qint64 progress_min, qint64 progress_max);
