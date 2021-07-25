@@ -90,7 +90,7 @@ private:
     qint64 m_progress_max = 0LL;
     qint64 m_progress_val = 0LL;
 
-    WordCounterError m_error;
+    WordCounterError m_error = WordCounterError::NoError;
     QString          m_error_string;
 
     QString m_file_name;

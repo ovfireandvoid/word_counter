@@ -33,8 +33,9 @@ auto WordCounterThread::result(int count) const -> WordCounterResult {
                                       res.begin(),
                                       res.end(),
                                       [](const auto &l, const auto &r) {
-                                          return l.second == r.second ? l.first < r.first
-                                                                      : l.second > r.second;
+                                          return l.second == r.second
+                                                     ? l.first.localeAwareCompare(r.first) < 0
+                                                     : l.second > r.second;
                                       });
     }();
 
@@ -43,7 +44,7 @@ auto WordCounterThread::result(int count) const -> WordCounterResult {
     }
 
     std::sort(res.begin(), res.end(), [](const auto &l, const auto &r) {
-        return l.first < r.first;
+        return l.first.localeAwareCompare(r.first) < 0;
     });
 
     return res;

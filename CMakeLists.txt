@@ -4,14 +4,19 @@ cmake_policy(SET CMP0092 NEW) # no default MSVC warning flags in CMAKE_<LANG>_FL
 
 project(WordCounter LANGUAGES CXX)
 
+set(BUILD_TESTS OFF CACHE BOOL "Build tests")
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC OFF)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}")
 
-message(STATUS ${CMAKE_MODULE_PATH})
-
 find_package(Qt5 COMPONENTS Core Gui Qml REQUIRED)
-
-find_package(Qt5LinguistTools REQUIRED)
 
 add_executable(${PROJECT_NAME})
 
@@ -20,13 +25,7 @@ include(cmake/CompilerWarnings)
 set_project_warnings(${PROJECT_NAME})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-    AUTOMOC ON
-    AUTORCC ON
-    AUTOUIC OFF
 
-    CXX_EXTENSIONS OFF
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
 
     OUTPUT_NAME "Word Counter"
 
@@ -54,6 +53,8 @@ target_sources(${PROJECT_NAME} PRIVATE
 
 # Translations
 
+find_package(Qt5LinguistTools REQUIRED)
+
 set(APP_TS_FILES
     src/translations/en.ts
 )
@@ -77,3 +78,11 @@ target_sources(${PROJECT_NAME} PRIVATE
 # Source Groups
 
 source_group(src REGULAR_EXPRESSION "^.*\.(cpp|h|qrc)$")
+
+# Tests
+
+if(BUILD_TESTS)
+    enable_testing()
+
+    add_subdirectory(tests)
+endif()
