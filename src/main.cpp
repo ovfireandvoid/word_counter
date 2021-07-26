@@ -5,6 +5,7 @@
 #include <QTranslator>
 #include <QUrl>
 
+#include "models/word_counter.h"
 #include "models/word_counter_model.h"
 
 auto main(int argc, char **argv) -> int {
@@ -27,7 +28,7 @@ auto main(int argc, char **argv) -> int {
     app.installTranslator(&app_translator);
 
     qmlRegisterModule("WordCounter", 1, 0);
-    qmlRegisterUncreatableType<WordCounter>("WordCounter", 1, 0, "WordCounter", {});
+    qmlRegisterType<WordCounter>("WordCounter", 1, 0, "WordCounter");
     qmlRegisterType<WordCounterModel>("WordCounter", 1, 0, "WordCounterModel");
     qmlProtectModule("WordCounter", 1);
 

@@ -2,27 +2,38 @@
 
 #include <QTimerEvent>
 
-WordCounterModel::WordCounterModel(QObject *parent) : QAbstractListModel(parent) {
-    connect(&m_counter, &WordCounter::statusChanged, [this] {
-        switch (m_counter.status()) {
-        case WordCounter::Status::None:
-        case WordCounter::Status::Canceled:
-        case WordCounter::Status::Error:
-            clearResult();
-            break;
-        case WordCounter::Status::Running:
-            m_update_timer = startTimer(17);
-            break;
-        case WordCounter::Status::Finished:
-            killTimer(m_update_timer);
-            updateResult();
-            break;
-        }
-    });
+#include "word_counter.h"
 
-    connect(&m_counter, &WordCounter::progressValChanged, [this] {
-        m_update_queued = m_counter.progressVal() > 0LL;
-    });
+WordCounterModel::WordCounterModel(QObject *parent) : QAbstractListModel(parent) { }
+
+auto WordCounterModel::counter() -> WordCounter * {
+    return m_counter;
+}
+
+void WordCounterModel::setCounter(WordCounter *counter) {
+    if (m_counter == counter) {
+        return;
+    }
+
+    if (m_counter != nullptr) {
+        m_counter->disconnect(this);
+    }
+
+    m_counter = counter;
+
+    if (m_counter) {
+        connect(m_counter, &WordCounter::statusChanged, [this] { fetchCounterStatus(); });
+
+        connect(m_counter, &WordCounter::progressValChanged, [this] {
+            m_update_queued = m_counter->progressVal() > 0LL;
+        });
+
+        fetchCounterStatus();
+    } else {
+        resetCounterResult();
+    }
+
+    emit counterChanged();
 }
 
 auto WordCounterModel::data(const QModelIndex &index, int role) const -> QVariant {
@@ -40,10 +51,10 @@ auto WordCounterModel::data(const QModelIndex &index, int role) const -> QVarian
         role_data = QVariant::fromValue(m_result.at(index.row()).second);
         break;
     case DataRole::WordCountFractionRole:
-        role_data = m_max_count == 0U
-                        ? QVariant::fromValue(0.0)
-                        : QVariant::fromValue(static_cast<double>(m_result.at(index.row()).second) /
-                                              static_cast<double>(m_max_count));
+        role_data = m_max_count != 0U
+                        ? QVariant::fromValue(static_cast<double>(m_result.at(index.row()).second) /
+                                              static_cast<double>(m_max_count))
+                        : QVariant::fromValue(0.0);
         break;
     }
 
@@ -62,20 +73,33 @@ auto WordCounterModel::rowCount(const QModelIndex &parent) const -> int {
     return !parent.isValid() ? m_result.size() : 0;
 }
 
-void WordCounterModel::openFile(const QUrl &file_url) {
-    m_counter.process(file_url);
+void WordCounterModel::fetchCounterStatus() {
+    if (m_counter == nullptr) {
+        return;
+    }
+
+    switch (m_counter->status()) {
+    case WordCounter::Status::None:
+    case WordCounter::Status::Canceled:
+    case WordCounter::Status::Error:
+        resetCounterResult();
+        break;
+    case WordCounter::Status::Running:
+        m_update_timer = startTimer(17);
+        break;
+    case WordCounter::Status::Finished:
+        killTimer(m_update_timer);
+        fetchCounterResult();
+        break;
+    }
 }
 
-void WordCounterModel::closeFile() {
-    m_counter.reset();
-}
+void WordCounterModel::fetchCounterResult() {
+    if (m_counter == nullptr) {
+        return resetCounterResult();
+    }
 
-auto WordCounterModel::counter() -> WordCounter * {
-    return &m_counter;
-}
-
-void WordCounterModel::updateResult() {
-    const auto result = m_counter.result(15);
+    const auto result = m_counter->result(15);
 
     if (m_result == result) {
         return;
@@ -135,7 +159,7 @@ void WordCounterModel::updateResult() {
     }
 }
 
-void WordCounterModel::clearResult() {
+void WordCounterModel::resetCounterResult() {
     if (!m_result.empty()) {
         beginRemoveRows({}, 0, m_result.size() - 1);
         m_result.clear();
@@ -145,7 +169,7 @@ void WordCounterModel::clearResult() {
 
 void WordCounterModel::timerEvent(QTimerEvent *event) {
     if (m_update_queued && (m_update_timer == event->timerId())) {
-        updateResult();
+        fetchCounterResult();
         m_update_queued = false;
     }
 }

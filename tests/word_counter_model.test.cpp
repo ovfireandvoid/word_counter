@@ -34,23 +34,31 @@ void WordCounterModelTest::initTestCase() {
 }
 
 void WordCounterModelTest::readNullData() {
-    WordCounterModel         model;
+    WordCounter      counter;
+    WordCounterModel model;
+
     QAbstractItemModelTester tester{&model};
+    model.setCounter(&counter);
 
-    model.openFile(QUrl::fromLocalFile(m_null_data_path));
+    counter.process(m_null_data_path);
 
-    QTest::qWait(500);
+    QVERIFY(
+        QTest::qWaitFor([&counter] { return counter.status() == WordCounter::Status::Finished; }));
 
     QCOMPARE(model.rowCount({}), 0);
 }
 
 void WordCounterModelTest::readTestData() {
-    WordCounterModel         model;
+    WordCounter      counter;
+    WordCounterModel model;
+
     QAbstractItemModelTester tester{&model};
+    model.setCounter(&counter);
 
-    model.openFile(QUrl::fromLocalFile(m_test_data_path));
+    counter.process(m_test_data_path);
 
-    QTest::qWait(500);
+    QVERIFY(
+        QTest::qWaitFor([&counter] { return counter.status() == WordCounter::Status::Finished; }));
 
     QCOMPARE(model.rowCount({}), 15);
 

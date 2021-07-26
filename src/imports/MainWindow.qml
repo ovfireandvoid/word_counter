@@ -9,11 +9,11 @@ ApplicationWindow {
     id: root
 
     function openFile(fileUrl) {
-        model.openFile(fileUrl);
+        counter.process(fileUrl);
     }
 
     function closeFile() {
-        model.closeFile();
+        counter.reset();
     }
 
     font {
@@ -34,9 +34,9 @@ ApplicationWindow {
     header: MainWindowHeader {
         id: header
 
-        buttonEnabled: model.counter.status !== WordCounter.None
+        buttonEnabled: counter.status !== WordCounter.None
         buttonText: qsTr('Close')
-        labelText: model.counter.fileName
+        labelText: counter.fileName
 
         visible: false
 
@@ -46,15 +46,19 @@ ApplicationWindow {
     footer: MainWindowFooter {
         id: footer
 
-        progressMin: model.counter.progressMin
-        progressMax: model.counter.progressMax
-        progressVal: model.counter.progressVal
+        progressMin: counter.progressMin
+        progressMax: counter.progressMax
+        progressVal: counter.progressVal
 
         visible: false
     }
 
     WordCounterModel {
         id: model
+
+        counter: WordCounter {
+            id: counter
+        }
     }
 
     FileDialog {
@@ -80,7 +84,7 @@ ApplicationWindow {
 
         Placeholder {
             buttonAccent: '#1E88E5'
-            buttonEnabled: model.counter.status === WordCounter.None
+            buttonEnabled: counter.status === WordCounter.None
             buttonText: qsTr('Browse Files')
             labelText: qsTr('Drag and Drop text document here or')
 
@@ -113,7 +117,7 @@ ApplicationWindow {
 
         Placeholder {
             buttonAccent: '#E53935'
-            buttonEnabled: model.counter.status === WordCounter.Error
+            buttonEnabled: counter.status === WordCounter.Error
             buttonText: qsTr('Go Back')
             labelText: qsTr('Something went wrong')
 
@@ -129,22 +133,22 @@ ApplicationWindow {
         states: [
             State {
                 name: 'empty'
-                when: model.counter.status === WordCounter.None
+                when: counter.status === WordCounter.None
 
                 PropertyChanges { target: layout; currentIndex: 0 }
             },
 
             State {
                 name: 'error'
-                when: model.counter.status === WordCounter.Error
+                when: counter.status === WordCounter.Error
 
                 PropertyChanges { target: layout; currentIndex: 1 }
             },
 
             State {
                 name: 'ready'
-                when: (model.counter.status === WordCounter.Canceled) ||
-                      (model.counter.status === WordCounter.Finished)
+                when: (counter.status === WordCounter.Canceled) ||
+                      (counter.status === WordCounter.Finished)
 
                 PropertyChanges { target: layout; currentIndex: 2 }
                 PropertyChanges { target: header; visible: true }
@@ -153,7 +157,7 @@ ApplicationWindow {
             State {
                 extend: 'ready'
                 name: 'running'
-                when: model.counter.status === WordCounter.Running
+                when: counter.status === WordCounter.Running
 
                 PropertyChanges { target: footer; visible: true }
             }

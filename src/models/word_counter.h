@@ -57,6 +57,8 @@ public:
     auto result(int count) const -> WordCounterResult;
 
     void process(const QString &file_name);
+
+public slots:
     void process(const QUrl &file_url);
     void cancel();
 

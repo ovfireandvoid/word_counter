@@ -1,14 +1,17 @@
 #pragma once
 
 #include <QAbstractListModel>
+#include <QPointer>
 #include <QUrl>
 
-#include "word_counter.h"
+#include "word_counter_result.h"
+
+class WordCounter;
 
 class WordCounterModel : public QAbstractListModel {
     Q_OBJECT
 
-    Q_PROPERTY(WordCounter *counter READ counter CONSTANT FINAL)
+    Q_PROPERTY(WordCounter *counter READ counter WRITE setCounter NOTIFY counterChanged FINAL)
 
 public:
     enum DataRole {
@@ -22,27 +25,28 @@ public:
 public:
     explicit WordCounterModel(QObject *parent = nullptr);
 
+    auto counter() -> WordCounter *;
+    void setCounter(WordCounter *counter);
+
 public:
     auto data(const QModelIndex &index, int role) const -> QVariant override;
     auto roleNames() const -> QHash<int, QByteArray> override;
     auto rowCount(const QModelIndex &parent) const -> int override;
 
-public slots:
-    void openFile(const QUrl &file_url);
-    void closeFile();
-
 private:
-    auto counter() -> WordCounter *;
+    void fetchCounterStatus();
 
-    void updateResult();
-    void clearResult();
+    void fetchCounterResult();
+    void resetCounterResult();
 
-private:
     void timerEvent(QTimerEvent *event) override;
 
+signals:
+    void counterChanged();
+
 private:
-    WordCounter       m_counter;
-    WordCounterResult m_result;
+    QPointer<WordCounter> m_counter;
+    WordCounterResult     m_result;
 
     quint32 m_max_count = 0U;
 
