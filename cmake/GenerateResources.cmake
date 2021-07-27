@@ -1,3 +1,8 @@
+#
+# generate_resources(OUTPUT <output-file> [PREFIX <prefix>] FILES <input-file> ...)
+#
+# Generates qrc file <output-file> with optinal <prefix> and list of <input-file>'s.
+#
 
 function(generate_resources)
     set(OPTIONS)
