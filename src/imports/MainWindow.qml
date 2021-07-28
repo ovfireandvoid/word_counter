@@ -61,6 +61,22 @@ ApplicationWindow {
         }
     }
 
+    Connections {
+        enabled: !timer.running
+        target: counter
+
+        function onProgressValChanged() {
+            model.update();
+            timer.start();
+        }
+    }
+
+    Timer {
+        id: timer
+
+        interval: 16
+    }
+
     FileDialog {
         id: fileDialog
 

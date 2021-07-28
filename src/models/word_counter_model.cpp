@@ -22,12 +22,7 @@ void WordCounterModel::setCounter(WordCounter *counter) {
     m_counter = counter;
 
     if (m_counter) {
-        connect(m_counter, &WordCounter::statusChanged, [this] { fetchCounterStatus(); });
-
-        connect(m_counter, &WordCounter::progressValChanged, [this] {
-            m_update_queued = m_counter->progressVal() > 0LL;
-        });
-
+        connect(m_counter, &WordCounter::statusChanged, this, &WordCounterModel::fetchCounterStatus);
         fetchCounterStatus();
     } else {
         resetCounterResult();
@@ -73,6 +68,10 @@ auto WordCounterModel::rowCount(const QModelIndex &parent) const -> int {
     return !parent.isValid() ? m_result.size() : 0;
 }
 
+void WordCounterModel::update() {
+    fetchCounterResult();
+}
+
 void WordCounterModel::fetchCounterStatus() {
     if (m_counter == nullptr) {
         return;
@@ -85,10 +84,7 @@ void WordCounterModel::fetchCounterStatus() {
         resetCounterResult();
         break;
     case WordCounter::Status::Running:
-        m_update_timer = startTimer(17);
-        break;
     case WordCounter::Status::Finished:
-        killTimer(m_update_timer);
         fetchCounterResult();
         break;
     }
@@ -164,12 +160,5 @@ void WordCounterModel::resetCounterResult() {
         beginRemoveRows({}, 0, m_result.size() - 1);
         m_result.clear();
         endRemoveRows();
-    }
-}
-
-void WordCounterModel::timerEvent(QTimerEvent *event) {
-    if (m_update_queued && (m_update_timer == event->timerId())) {
-        fetchCounterResult();
-        m_update_queued = false;
     }
 }

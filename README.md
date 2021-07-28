@@ -20,8 +20,8 @@ Access to the word count histogram protected by mutex, so main thread can peak i
 
 [WordCounterModel](src/models/word_counter_model.h) wraps instance of `WordCounter` and provides data for UI:
 
-* connects to the status updates of `WordCounter`
-* when file processing starts, initiates internal timer to peak intermediate results
+* connects to the status updates of `WordCounter` and fetches result when file processing is complete
+* provides `update` method for peaking intermediate results, while file processing is running
 
 ## Build Requirements
 

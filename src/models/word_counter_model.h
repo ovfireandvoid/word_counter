@@ -33,13 +33,14 @@ public:
     auto roleNames() const -> QHash<int, QByteArray> override;
     auto rowCount(const QModelIndex &parent) const -> int override;
 
+public slots:
+    void update();
+
 private:
     void fetchCounterStatus();
 
     void fetchCounterResult();
     void resetCounterResult();
-
-    void timerEvent(QTimerEvent *event) override;
 
 signals:
     void counterChanged();
@@ -49,7 +50,4 @@ private:
     WordCounterResult     m_result;
 
     quint32 m_max_count = 0U;
-
-    int  m_update_timer  = -1;
-    bool m_update_queued = false;
 };
